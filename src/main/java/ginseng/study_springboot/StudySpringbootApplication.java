@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
-import org.springframework.http.HttpHeaders;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,31 +17,30 @@ import org.springframework.http.MediaType;
 public class StudySpringbootApplication {
 
     public static void main(String[] args) {
+        // 스프링컨테이너를 사용해보자
+        GenericApplicationContext applicationContext = new GenericApplicationContext();
+        // 서블릿의 경우에는 new HttpServerlet해서 add 해줬던걸
+        // 스프링컨테이너에서는 클래스를 이용해서 Bean Object를 만들어준다.
+        applicationContext.registerBean(HelloController.class);
+        applicationContext.refresh();
 
         ServletWebServerFactory factory = new TomcatServletWebServerFactory();
         WebServer webServer = factory.getWebServer(servletContext -> {
-            HelloController helloController = new HelloController();
-
             servletContext.addServlet("frontController", new HttpServlet() {
                 @Override
                 protected void service(HttpServletRequest req, HttpServletResponse resp)
                     throws ServletException, IOException {
-                    //  인증, 보안, 다국어 처리 등 공통기능을 처리할 수 있다.
-
-                    //url 이 hello 이면서 GET일때
                     if (req.getRequestURI().equals("/hello") && req.getMethod().equals(HttpMethod.GET.name())) {
 
-                        //요청으로부터 파라미터 추출하고
                         String name = req.getParameter("name");
-                        // 컨트롤러 로 전달하기. helloController는 웹형식의 리퀘스트를 다루지 않고, 평범한 자바 타입의 오브젝트 (DTO 등) 를 사용할 수 있게 한다.
-                        // 이런류의 작업을 바인딩이라고 한다.
+
+                        // 서블릿 컨테이너가 스프링컨테이너에게 HelloController 타입의 빈을 가져오도록 한다.
+                        HelloController helloController = applicationContext.getBean(HelloController.class);
                         String ret = helloController.hello(name);
 
-                        resp.setStatus(HttpStatus.OK.value());
-                        resp.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE);
+                        resp.setContentType(MediaType.TEXT_PLAIN_VALUE);
                         resp.getWriter().print(ret);
-                    } else if (req.getRequestURI().equals("/user")) {
-                        //
+
                     } else {
                         resp.setStatus(HttpStatus.NOT_FOUND.value());
                     }
