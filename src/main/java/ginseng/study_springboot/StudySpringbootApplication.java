@@ -17,11 +17,10 @@ import org.springframework.http.MediaType;
 public class StudySpringbootApplication {
 
     public static void main(String[] args) {
-        // 스프링컨테이너를 사용해보자
         GenericApplicationContext applicationContext = new GenericApplicationContext();
-        // 서블릿의 경우에는 new HttpServerlet해서 add 해줬던걸
-        // 스프링컨테이너에서는 클래스를 이용해서 Bean Object를 만들어준다.
         applicationContext.registerBean(HelloController.class);
+        applicationContext.registerBean(SimpleHelloService.class);
+        //assembler가 매핑
         applicationContext.refresh();
 
         ServletWebServerFactory factory = new TomcatServletWebServerFactory();
