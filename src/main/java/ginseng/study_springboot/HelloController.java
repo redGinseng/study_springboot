@@ -1,11 +1,16 @@
 package ginseng.study_springboot;
 
 import java.util.Objects;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RequestMapping("/hello")
+//@Controller  // @Component + a
+@RestController //@Controller + @ResponseBody
 public class HelloController {
 
     private final HelloService helloService;
