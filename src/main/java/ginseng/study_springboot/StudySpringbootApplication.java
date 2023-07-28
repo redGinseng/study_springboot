@@ -20,18 +20,24 @@ public class StudySpringbootApplication {
 
     // 서블릿을 다루고 싶지 않아서 컨테이너리스=스프링 을 사용하고 있는데, 자꾸만 서블릿 코드가 복잡해진다.
     public static void main(String[] args) {
-        GenericWebApplicationContext applicationContext = new GenericWebApplicationContext();
+        // 스프링 컨테이너 초기화하고 빈을 등록 (refresh) , 등록할 때(onRefresh) 서블릿컨테이너를 생성하고, Frontcontroller를 등록까지
+        GenericWebApplicationContext applicationContext = new GenericWebApplicationContext(){
+          @Override
+          protected void onRefresh(){
+              super.onRefresh();
+              ServletWebServerFactory factory = new TomcatServletWebServerFactory();
+              WebServer webServer = factory.getWebServer(servletContext -> {
+                  servletContext.addServlet("dispatcherServlet",
+                      new DispatcherServlet(this)
+                  ).addMapping("/*");
+              });
+              webServer.start();
+          }
+        };
         applicationContext.registerBean(HelloController.class);
         applicationContext.registerBean(SimpleHelloService.class);
         applicationContext.refresh();
 
-        ServletWebServerFactory factory = new TomcatServletWebServerFactory();
-        WebServer webServer = factory.getWebServer(servletContext -> {
-            servletContext.addServlet("dispatcherServlet",
-                new DispatcherServlet(applicationContext)
-                ).addMapping("/*");
-        });
-        webServer.start();
     }
 
 }
