@@ -12,40 +12,24 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 
 //@SpringBootApplication
 public class StudySpringbootApplication {
 
+    // 서블릿을 다루고 싶지 않아서 컨테이너리스=스프링 을 사용하고 있는데, 자꾸만 서블릿 코드가 복잡해진다.
     public static void main(String[] args) {
-        GenericApplicationContext applicationContext = new GenericApplicationContext();
+        GenericWebApplicationContext applicationContext = new GenericWebApplicationContext();
         applicationContext.registerBean(HelloController.class);
         applicationContext.registerBean(SimpleHelloService.class);
-        //assembler가 매핑
         applicationContext.refresh();
 
         ServletWebServerFactory factory = new TomcatServletWebServerFactory();
         WebServer webServer = factory.getWebServer(servletContext -> {
-            servletContext.addServlet("frontController", new HttpServlet() {
-                @Override
-                protected void service(HttpServletRequest req, HttpServletResponse resp)
-                    throws ServletException, IOException {
-                    if (req.getRequestURI().equals("/hello") && req.getMethod().equals(HttpMethod.GET.name())) {
-
-                        String name = req.getParameter("name");
-
-                        // 서블릿 컨테이너가 스프링컨테이너에게 HelloController 타입의 빈을 가져오도록 한다.
-                        HelloController helloController = applicationContext.getBean(HelloController.class);
-                        String ret = helloController.hello(name);
-
-                        resp.setContentType(MediaType.TEXT_PLAIN_VALUE);
-                        resp.getWriter().print(ret);
-
-                    } else {
-                        resp.setStatus(HttpStatus.NOT_FOUND.value());
-                    }
-                }
-                //이 서블렛은 어떤역할을 할지 매핑추가
-            }).addMapping("/*");
+            servletContext.addServlet("dispatcherServlet",
+                new DispatcherServlet(applicationContext)
+                ).addMapping("/*");
         });
         webServer.start();
     }
