@@ -8,5 +8,6 @@ package ginseng.study_springboot;
 // HelloController는 어떤 타입의 오브젝트를 사용해야할지 어떻게 아는가?
 // 그걸 매핑해주는게 DI. 그걸 해주는게 Assembler
 public interface HelloService {
+
     String sayHello(String name);
 }
