@@ -23,6 +23,10 @@ public class HelloController {
     @ResponseBody
     public String hello(String name) {  //DispatcherServlet은 스트링을 받아 뷰를 리턴하는데, 뷰가 없으면 404가 나간다. @ResponseBody를 넣어준다.
 
+        if (name == null || name.trim().length() == 0) {
+            throw new IllegalArgumentException();
+        }
+
         return helloService.sayHello(Objects.requireNonNull(name));
     }
 

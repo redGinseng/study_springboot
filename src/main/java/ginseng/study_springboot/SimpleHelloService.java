@@ -1,6 +1,5 @@
 package ginseng.study_springboot;
 
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 @Service
